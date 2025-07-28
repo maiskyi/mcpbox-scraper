@@ -1,0 +1,5 @@
+.env
+.venv
+result.json
+result_list.json
+__pycache__
