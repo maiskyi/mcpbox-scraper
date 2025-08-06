@@ -34,20 +34,18 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          docker build -t "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}" ./
-          docker push "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}"
+          docker build -t "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}" ./
+          docker push "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          job: ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}
+          job: ${{ vars.GCP_CLOUD_RUN_JOB_NAME }}
           region: ${{ vars.GCP_REGION }}
-          image: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}
+          image: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}
           flags: |
-            --port=8080
-            --timeout=300
-            --allow-unauthenticated
+            --max-retries=3
           secrets: |
             SMITHERY_API_KEY=SMITHERY_API_KEY:latest
             STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
