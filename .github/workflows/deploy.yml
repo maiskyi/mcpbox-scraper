@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    name: Deploy
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Docker Auth
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}" ./
+          docker push "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}
+          flags: |
+            --port=8080
+            --timeout=300
+            --allow-unauthenticated
+          secrets: |
+            SMITHERY_API_KEY=SMITHERY_API_KEY:latest
+            STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
+          env_vars: |
+            STORAGE_BACKET_FOLDER=smithery
+            
+
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
+
+      
