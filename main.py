@@ -16,7 +16,8 @@ def main():
     update_freq = int(os.getenv("SMITHERY_UPDATE_FREQ")) * 3600
     
     app = SmithreApi(api_key)
-    storage_client = storage.Client.from_service_account_json(storage_account_key)
+    # storage_client = storage.Client.from_service_account_json(storage_account_key)
+    storage_client = storage.Client()
     
     if os.path.exists("result.json"):
         with open("result.json", "r") as file:
