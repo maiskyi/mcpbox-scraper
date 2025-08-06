@@ -52,6 +52,7 @@ jobs:
           env_vars: |
             STORAGE_BACKET_FOLDER=smithery
             SMITHERY_UPDATE_FREQ=72
+            STORAGE_SERVICE_ACCOUNT_KEY=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
             
 
       - name: Show Output
