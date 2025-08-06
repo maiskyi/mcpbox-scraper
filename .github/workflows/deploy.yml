@@ -41,7 +41,7 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}
+          job: ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}
           region: ${{ vars.GCP_REGION }}
           image: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}/${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }}:${{ github.sha }}
           flags: |
