@@ -5,6 +5,9 @@ on:
     branches: main
   workflow_dispatch:
 
+env:
+  DOCKER_IMAGE: ''
+
 
 jobs:
   deploy:
@@ -20,6 +23,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup environment variables
+        run: |
+          echo "DOCKER_IMAGE=${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ github.run_number }}:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Confirm environment variables
+        run: |
+          echo ${{env.DOCKER_IMAGE}}
+
       - name: Google Auth
         uses: google-github-actions/auth@v2
         with:
@@ -34,8 +45,8 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          docker build -t "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}" ./
-          docker push "${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}"
+          docker build -t "${{ env.DOCKER_IMAGE }}" ./
+          docker push "${{ env.DOCKER_IMAGE }}"
 
       - name: Deploy to Cloud Run
         id: deploy
@@ -43,9 +54,10 @@ jobs:
         with:
           job: ${{ vars.GCP_CLOUD_RUN_JOB_NAME }}
           region: ${{ vars.GCP_REGION }}
-          image: ${{ vars.GCP_GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}/${{ vars.GCP_CLOUD_RUN_JOB_NAME }}:${{ github.sha }}
+          image: ${{ env.DOCKER_IMAGE }}
           flags: |
             --max-retries=3
+            --max-instances=1
           secrets: |
             SMITHERY_API_KEY=SMITHERY_API_KEY:latest
             STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
