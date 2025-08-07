@@ -56,8 +56,7 @@ jobs:
           region: ${{ vars.GCP_REGION }}
           image: ${{ env.DOCKER_IMAGE }}
           flags: |
-            --max-retries=3
-            --max-instances=1
+            --max-retries=1
           secrets: |
             SMITHERY_API_KEY=SMITHERY_API_KEY:latest
             STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
