@@ -57,6 +57,8 @@ jobs:
           image: ${{ env.DOCKER_IMAGE }}
           flags: |
             --max-retries=1
+            --timeout=24h
+            --concurrency=1
           secrets: |
             SMITHERY_API_KEY=SMITHERY_API_KEY:latest
             STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
