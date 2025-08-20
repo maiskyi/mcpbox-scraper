@@ -59,7 +59,6 @@ jobs:
             --max-retries=1
             --task-timeout=24h
             --parallelism=1
-            # --task-count=1
           secrets: |
             SMITHERY_API_KEY=SMITHERY_API_KEY:latest
             STORAGE_BACKET_NAME=SCRAPER_STORAGE_BACKET_NAME:latest
