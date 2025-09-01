@@ -20,7 +20,7 @@ def main():
     
     servers_list = app.get_all_servers()
 
-    for server in enumerate(servers_list):
+    for server in servers_list:
         timestamp = int(time.time()*1000)
         server_name = server["qualifiedName"]
         print(f"Server {server_name}")
